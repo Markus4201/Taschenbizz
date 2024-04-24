@@ -30,13 +30,17 @@ def create_buy_order(item_name, quantity, minimum_difference):
     time.sleep(0.1)
 
     # Überprüfen, ob Orderübersicht aufgeklappt ist
-    order_overview = ScanNumberInRegion((X + 700, Y + 272, X + 737, Y + 288))
-    if not order_overview:  # Falls der Bereich leer ist, klicken, um zu öffnen
-        pyautogui.click(X + 1055, Y + 148)
+    order_overview = ScanNumberInRegion((X + 700, Y + 272, X + 737, Y + 288), )
+    print(order_overview)
+    if not order_overview or order_overview == "":  # Falls der Bereich leer ist, klicken, um zu öffnen
+        pyautogui.moveTo(X + 916, Y + 233)
+        time.sleep(6)
+        pyautogui.click(X + 916, Y + 233)
         time.sleep(0.1)
         order_overview = ScanNumberInRegion((X + 700, Y + 272, X + 737, Y + 288))
         if not order_overview:
-            return "Fehler: Preisübersicht konnte nicht geöffnet werden."
+            print( "Fehler: Preisübersicht konnte nicht geöffnet werden.")
+            return
 
     # Scanne beste Buy und Sell Order
     sell_price_string = ScanNumberInRegion((X + 700, Y + 272, X + 737, Y + 288))
@@ -48,13 +52,14 @@ def create_buy_order(item_name, quantity, minimum_difference):
 
     # Überprüfe Differenz der Preise
     print((sell_price - buy_price) / float(sell_price))
-    if not sell_price or not buy_price or (sell_price - buy_price)*100 / sell_price <= minimum_difference:
-        return "Fehler: Preisunterschied nicht groß genug."
+    if not sell_price or not buy_price or (sell_price - buy_price) * 100 / sell_price <= minimum_difference:
+        print("Fehler: Preisunterschied nicht groß genug.")
+        return
 
     # Prozess zur Erstellung der Kauforder
     pyautogui.click(X + 276, Y + 430)  # Klick auf "Kauforder"
     time.sleep(0.1)
-    for _ in range(quantity-1):  # Klicke (+) bei Anzahl
+    for _ in range(quantity - 1):  # Klicke (+) bei Anzahl
         pyautogui.click(X + 557, Y + 484)
         time.sleep(0.1)
     pyautogui.click(X + 554, Y + 518)  # Klicke auf (+) bei Preis
