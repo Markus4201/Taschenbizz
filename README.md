@@ -13,12 +13,11 @@ Follow these steps to get your development environment running:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/yourprojectname.git
-   cd yourprojectname
+   git clone https:https://github.com/l-don/TaschenBizz.git
 
 2. **Install the required packages:**
     Ensure you have `pip` installed and then run the following command to install the required packages:
     ```bash
     pip install numpy Pillow matplotlib pytesseract pyautogui
-    
+    ```
     Note: You also need to install Tesseract-OCR separately for pytesseract to function. Visit this link for installation instructions: https://www.youtube.com/watch?v=HNCypVfeTdw
