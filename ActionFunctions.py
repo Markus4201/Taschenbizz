@@ -5,6 +5,7 @@ import pytesseract
 import pyautogui
 import time
 from Utility.window_detect import getAlbionPos
+from Scanner import scan_number_in_region, scan_string_in_region
 
 
 def clean_and_convert_to_int(input_string):
@@ -43,10 +44,9 @@ def create_buy_order(item_name, quantity, minimum_difference):
             return
 
     # Scanne beste Buy und Sell Order
-    sell_price_string = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288))
-    sell_price = clean_and_convert_to_int(sell_price_string)
-    buy_price_string = scan_number_in_region((X + 925, Y + 272, X + 962, Y + 288))
-    buy_price = clean_and_convert_to_int(buy_price_string)
+    sell_price = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288))
+
+    buy_price = scan_number_in_region((X + 925, Y + 272, X + 962, Y + 288))
 
     print("Detected Prices:", buy_price, sell_price)
 
@@ -79,13 +79,7 @@ def type_with_delay(text, delay=0.01):
         time.sleep(delay)
 
 
-import pyautogui
-import time
-import pytesseract
-
-
 def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     X, Y = getAlbionPos()
 
     # Klick auf "Meine Orders"
@@ -99,6 +93,7 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
 
     # Überprüfe ob Order vorhanden
     scanned_name = scan_string_in_region((X + 391, Y + 302, X + 531, Y + 321))
+    print("Scanned name:",scanned_name)
     if scanned_name.strip().lower() != item_name.lower():
         print("Fehler: Order für das Item nicht gefunden.")
         return
@@ -154,53 +149,16 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
 
 
 def collect_items():
+    x, y = getAlbionPos()
     # Bewegen zum Button "Abgeschlossene Handel" und klicken
-    pyautogui.moveTo(1040, 615, duration=0.3)
+    pyautogui.moveTo(x + 1040, y + 615, duration=0.3)
     pyautogui.click()
 
     # Kurze Pause, um sicherzustellen, dass die UI reagiert
     time.sleep(0.5)
 
     # Bewegen zum Button "Alles einsammeln" und klicken
-    pyautogui.moveTo(940, 750, duration=0.3)
+    pyautogui.moveTo(x + 940, y + 750, duration=0.3)
     pyautogui.click()
 
     print("Items erfolgreich eingesammelt.")
-
-
-# Methode, um Zahlen in einem bestimmten Bereich zu scannen
-def scan_number_in_region(region, showImage=False):
-    # Bildschirmaufnahme des spezifizierten Bereichs
-    screen = np.array(ImageGrab.grab(bbox=region))
-
-    # Bild anzeigen, wenn showImage True ist
-    if showImage:
-        plt.imshow(screen, cmap='gray')
-        plt.title("Verarbeitetes Bild für OCR")
-        plt.show()
-
-    # OCR-Konfiguration für Zahlenextraktion
-    custom_config = r'--oem 3 --psm 6 outputbase digits'
-    extracted_text = pytesseract.image_to_string(screen, config=custom_config)
-
-    print("extrahierte zahl: " + str(clean_and_convert_to_int(extracted_text)))
-    return clean_and_convert_to_int(extracted_text)
-
-
-def scan_string_in_region(region, showImage=False):
-    # Bildschirmaufnahme des spezifizierten Bereichs
-    screen = np.array(ImageGrab.grab(bbox=region))
-
-    # Bild anzeigen, wenn showImage True ist
-    if showImage:
-        plt.imshow(screen, cmap='gray')
-        plt.title("Verarbeitetes Bild für OCR")
-        plt.show()
-
-    # OCR-Konfiguration für Zahlenextraktion
-    custom_config = r'--oem 3 --psm 6 outputbase digits'
-    extracted_text = pytesseract.image_to_string(screen)
-
-    print("extrahierter text: " + extracted_text)
-
-    return extracted_text
