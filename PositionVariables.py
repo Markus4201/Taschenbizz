@@ -4,6 +4,7 @@ from Utility.window_detect import getAlbionPos
 class PositionConfig:
     def __init__(self):
         X, Y = getAlbionPos()
+        #CreateBuyOrder
         self.ITEM_NAME_ENTRY_POS = (X + 330, Y + 180)
         self.BUY_BUTTON_POS = (X + 920, Y + 330)
         self.ORDER_OVERVIEW_TOGGLE_POS = (X + 906, Y + 233)
@@ -21,3 +22,4 @@ class PositionConfig:
         self.COLLECT_TRADES_POS = (X + 1040, Y + 615)
         self.COLLECT_ALL_POS = (X + 940, Y + 750)
         self.BUY_SECTION_BUTTON = (X + 1036, Y + 242)
+        self.MY_ORDER_ITEM_NAME = (X + 385, Y + 302, X + 530, Y + 321)

@@ -54,47 +54,46 @@ def create_buy_order(item_name, quantity, minimum_difference):
 
 
 def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
-    X, Y = getAlbionPos()
-
+    positions = PositionConfig()
     # Klick auf "Meine Orders"
-    pyautogui.moveTo(X + 1033, Y + 470, duration=0.3)
+    pyautogui.moveTo(positions.MY_ORDERS_POS, duration=0.3)
     pyautogui.click()
 
     # Klick auf Eingabefeld
-    pyautogui.moveTo(X + 340, Y + 180, duration=0.3)
+    pyautogui.moveTo(positions.ITEM_NAME_ENTRY_POS, duration=0.3)
     pyautogui.click()
     type_with_delay(item_name)
 
     # Überprüfe ob Order vorhanden
-    scanned_name = scan_string_in_region((X + 391, Y + 302, X + 531, Y + 321))
+    scanned_name = scan_string_in_region(positions.MY_ORDER_ITEM_NAME)  # Annahme: die Region ist hier korrekt
     print("Scanned name:", scanned_name)
     if scanned_name.strip().lower() != item_name.lower():
         print("Fehler: Order für das Item nicht gefunden.")
         return
 
     # Anzahl der Items merken
-    item_count = scan_number_in_region((X + 540, Y + 300, X + 584, Y + 320))
+    item_count = scan_number_in_region((positions.EDIT_BUTTON_POS[0] + 300, positions.EDIT_BUTTON_POS[1] - 11, positions.EDIT_BUTTON_POS[0] + 384, positions.EDIT_BUTTON_POS[1] + 19))
 
     # Aktuellen Order Preis merken
-    item_price = scan_number_in_region((X + 734, Y + 300, X + 834, Y + 322))
+    item_price = scan_number_in_region((positions.EDIT_BUTTON_POS[0] - 158, positions.EDIT_BUTTON_POS[1] - 11, positions.EDIT_BUTTON_POS[0] - 58, positions.EDIT_BUTTON_POS[1] + 19))
 
     # Klicke auf Bearbeiten
-    pyautogui.moveTo(X + 892, Y + 311, duration=0.3)
+    pyautogui.moveTo(positions.EDIT_BUTTON_POS, duration=0.3)
     pyautogui.click()
     time.sleep(0.2)
 
-    # Überprüfen, ob Preisübersicht geöffnet ist (ähnlich wie in create_buy_order)
-    order_overview = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288))
-    if not order_overview:  # Falls der Bereich leer ist, klicken, um zu öffnen
-        pyautogui.moveTo(X + 916, Y + 233, duration=0.3)
+    # Überprüfen, ob Preisübersicht geöffnet ist
+    order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
+    if not order_overview:
+        pyautogui.moveTo(positions.ORDER_OVERVIEW_TOGGLE_POS, duration=0.3)
         pyautogui.click()
-        order_overview = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288))
+        order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
         if not order_overview:
             print("Fehler: Preisübersicht konnte nicht geöffnet werden.")
             return
 
     # Scanne beste Buy Order
-    best_buy_price = scan_number_in_region((X + 925, Y + 272, X + 962, Y + 288))
+    best_buy_price = scan_number_in_region(positions.BEST_BUY_PRICE_REGION)
 
     # Setze Preis auf gescannten Preis +1, falls < maxPayAmount
     new_price = best_buy_price + 1
@@ -102,24 +101,24 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
         print("Deine Order ist noch die Beste")
     else:
         if new_price < max_pay_amount:
-            pyautogui.moveTo(X + 350, Y + 517, duration=0.3)  # Klicke auf Eingabefeld für Preis
+            pyautogui.moveTo(positions.INCREASE_PRICE_POS, duration=0.3)
             pyautogui.click()
-            pyautogui.write(str(new_price))  # Eingabe des neuen Preises
+            pyautogui.write(str(new_price))
         else:
             print("Fehler: Maximaler Zahlbetrag überschritten.")
             return
 
     # Klicke (+) bei Anzahl bis gewünschte Anzahl wieder erreicht
     for _ in range(quantity - item_count):
-        pyautogui.moveTo(X + 557, Y + 484, duration=0.6)
+        pyautogui.moveTo(positions.INCREASE_QUANTITY_POS, duration=0.6)
         pyautogui.click()
 
     # Klicke auf Order Aktualisieren
-    pyautogui.moveTo(X + 571, Y + 608, duration=1)
+    pyautogui.moveTo(positions.CONFIRM_ORDER_POS, duration=1)
     pyautogui.click()
 
     print("Kauforder erfolgreich aktualisiert.")
-    return
+
 
 
 def collect_items():
