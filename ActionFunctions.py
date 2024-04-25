@@ -6,6 +6,21 @@ import pyautogui
 import time
 from Utility.window_detect import getAlbionPos
 from Scanner import scan_number_in_region, scan_string_in_region
+import cv2
+
+
+def is_similar(screen_region, template_path, threshold=0.8):
+    # Lade das Template-Bild
+    template = cv2.imread(template_path, 0)  # 0 bedeutet, dass es in Graustufen geladen wird
+    screen = np.array(ImageGrab.grab(bbox=screen_region))
+    screen_gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+
+    # Template Matching durchführen
+    result = cv2.matchTemplate(screen_gray, template, cv2.TM_CCOEFF_NORMED)
+    _, max_val, _, _ = cv2.minMaxLoc(result)
+
+    # Prüfe, ob die Ähnlichkeit über dem Schwellenwert liegt
+    return max_val >= threshold
 
 
 def clean_and_convert_to_int(input_string):
@@ -17,9 +32,10 @@ def clean_and_convert_to_int(input_string):
 
 def create_buy_order(item_name, quantity, minimum_difference):
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+
     X, Y = getAlbionPos()
     # Klick auf Eingabefeld
-    pyautogui.click(X + 340, Y + 180)
+    pyautogui.click(X + 330, Y + 180)
     time.sleep(0.1)
 
     # Eingabe des Itemnamens
@@ -27,26 +43,26 @@ def create_buy_order(item_name, quantity, minimum_difference):
     time.sleep(1)
 
     # "Kaufen" Button anklicken
-    pyautogui.click(X + 930, Y + 330)
+    pyautogui.click(X + 920, Y + 330)
     time.sleep(0.1)
 
     # Überprüfen, ob Orderübersicht aufgeklappt ist
-    order_overview = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288), )
+    order_overview = scan_number_in_region((X + 690, Y + 272, X + 727, Y + 288), )
     print(order_overview)
     if not order_overview or order_overview == "":  # Falls der Bereich leer ist, klicken, um zu öffnen
-        pyautogui.moveTo(X + 916, Y + 233)
+        pyautogui.moveTo(X + 906, Y + 233)
         time.sleep(6)
-        pyautogui.click(X + 916, Y + 233)
+        pyautogui.click(X + 906, Y + 233)
         time.sleep(0.1)
-        order_overview = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288))
+        order_overview = scan_number_in_region((X + 690, Y + 272, X + 727, Y + 288))
         if not order_overview:
             print("Fehler: Preisübersicht konnte nicht geöffnet werden.")
             return
 
     # Scanne beste Buy und Sell Order
-    sell_price = scan_number_in_region((X + 700, Y + 272, X + 737, Y + 288))
+    sell_price = scan_number_in_region((X + 690, Y + 272, X + 727, Y + 288))
 
-    buy_price = scan_number_in_region((X + 925, Y + 272, X + 962, Y + 288))
+    buy_price = scan_number_in_region((X + 915, Y + 272, X + 952, Y + 288))
 
     print("Detected Prices:", buy_price, sell_price)
 
@@ -57,16 +73,16 @@ def create_buy_order(item_name, quantity, minimum_difference):
         return
 
     # Prozess zur Erstellung der Kauforder
-    pyautogui.click(X + 276, Y + 430)  # Klick auf "Kauforder"
+    pyautogui.click(X + 266, Y + 430)  # Klick auf "Kauforder"
     time.sleep(0.1)
     for _ in range(quantity - 1):  # Klicke (+) bei Anzahl
-        pyautogui.click(X + 557, Y + 484)
+        pyautogui.click(X + 547, Y + 484)
         time.sleep(0.1)
-    pyautogui.click(X + 554, Y + 518)  # Klicke auf (+) bei Preis
+    pyautogui.click(X + 544, Y + 518)  # Klicke auf (+) bei Preis
     time.sleep(0.1)
-    pyautogui.click(X + 571, Y + 608)  # Klicke auf "Kauforder erstellen"
+    pyautogui.click(X + 561, Y + 608)  # Klicke auf "Kauforder erstellen"
     time.sleep(0.1)
-    pyautogui.click(X + 527, Y + 450)  # Klicke auf "Ja"
+    pyautogui.click(X + 517, Y + 450)  # Klicke auf "Ja"
     time.sleep(0.1)
 
     print("Kauforder erfolgreich erstellt.")
@@ -149,16 +165,20 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
 
 
 def collect_items():
-    x, y = getAlbionPos()
-    # Bewegen zum Button "Abgeschlossene Handel" und klicken
-    pyautogui.moveTo(x + 1040, y + 615, duration=0.3)
-    pyautogui.click()
+    X, Y = getAlbionPos()
+    screen_region = (X + 1022, Y + 616, X + 1043, Y + 636)
+    template_path = 'assets/check.png'
+    if is_similar(screen_region, template_path):
+        # Bewegen zum Button "Abgeschlossene Handel" und klicken
+        pyautogui.moveTo(X + 1040, Y + 615, duration=0.3)
+        pyautogui.click()
 
-    # Kurze Pause, um sicherzustellen, dass die UI reagiert
-    time.sleep(0.5)
+        time.sleep(0.5)
 
-    # Bewegen zum Button "Alles einsammeln" und klicken
-    pyautogui.moveTo(x + 940, y + 750, duration=0.3)
-    pyautogui.click()
+        # Bewegen zum Button "Alles einsammeln" und klicken
+        pyautogui.moveTo(X + 940, Y + 750, duration=0.3)
+        pyautogui.click()
 
-    print("Items erfolgreich eingesammelt.")
+        print("Items erfolgreich eingesammelt.")
+    else:
+        print("Keine Abholbereiten items erkannt")

@@ -2,6 +2,7 @@ import numpy as np
 from PIL import ImageGrab
 import matplotlib.pyplot as plt
 import pytesseract
+import cv2
 
 
 def scan_string_in_region(region, showImage=False):
@@ -48,3 +49,22 @@ def scan_number_in_region(region, showImage=False):
 
     # Rückgabe der bereinigten und konvertierten Zahl
     return clean_and_convert_to_int(extracted_text)
+
+
+def is_similar(screen_region, template_path, threshold=0.8, showImage=False):
+    # Lade das Template-Bild
+    template = cv2.imread(template_path, 0)  # 0 bedeutet, dass es in Graustufen geladen wird
+    screen = np.array(ImageGrab.grab(bbox=screen_region))
+    screen_gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
+
+    if showImage:
+        plt.imshow(screen, cmap='gray')
+        plt.title("Verarbeitetes Bild für OCR")
+        plt.show()
+
+    # Template Matching durchführen
+    result = cv2.matchTemplate(screen_gray, template, cv2.TM_CCOEFF_NORMED)
+    _, max_val, _, _ = cv2.minMaxLoc(result)
+
+    # Prüfe, ob die Ähnlichkeit über dem Schwellenwert liegt
+    return max_val >= threshold

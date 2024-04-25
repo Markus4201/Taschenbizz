@@ -27,7 +27,7 @@ def callback(hwnd, extra):
         
 def getAlbionPos():
     win32gui.EnumWindows(callback, None)
-    return pos[0], pos[1]
+    return pos[0]+11, pos[1] #+11 ist n random offset der da ist, kp wo der her kommt
 
 def getAlbionSize():
     win32gui.EnumWindows(callback, None)
