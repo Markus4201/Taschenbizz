@@ -1,98 +1,56 @@
-import numpy as np
-from PIL import ImageGrab
-import matplotlib.pyplot as plt
-import pytesseract
 import pyautogui
 import time
 from Utility.window_detect import getAlbionPos
-from Scanner import scan_number_in_region, scan_string_in_region
-import cv2
-
-
-def is_similar(screen_region, template_path, threshold=0.8):
-    # Lade das Template-Bild
-    template = cv2.imread(template_path, 0)  # 0 bedeutet, dass es in Graustufen geladen wird
-    screen = np.array(ImageGrab.grab(bbox=screen_region))
-    screen_gray = cv2.cvtColor(screen, cv2.COLOR_BGR2GRAY)
-
-    # Template Matching durchführen
-    result = cv2.matchTemplate(screen_gray, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, _ = cv2.minMaxLoc(result)
-
-    # Prüfe, ob die Ähnlichkeit über dem Schwellenwert liegt
-    return max_val >= threshold
-
-
-def clean_and_convert_to_int(input_string):
-    # Entfernen aller Zeichen, die keine Ziffern sind
-    cleaned_string = ''.join(c for c in input_string if c.isdigit())
-    # Konvertieren in eine Ganzzahl
-    return int(cleaned_string)
+from Scanner import scan_number_in_region, scan_string_in_region, is_similar
+from HelperFuncitons import type_with_delay
+from PositionVariables import *
 
 
 def create_buy_order(item_name, quantity, minimum_difference):
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
-
-    X, Y = getAlbionPos()
-    # Klick auf Eingabefeld
-    pyautogui.click(X + 330, Y + 180)
+    positions = PositionConfig()
+    pyautogui.click(positions.ITEM_NAME_ENTRY_POS)
     time.sleep(0.1)
-
-    # Eingabe des Itemnamens
     pyautogui.write(item_name)
     time.sleep(1)
-
-    # "Kaufen" Button anklicken
-    pyautogui.click(X + 920, Y + 330)
+    pyautogui.click(positions.BUY_BUTTON_POS)
     time.sleep(0.1)
 
-    # Überprüfen, ob Orderübersicht aufgeklappt ist
-    order_overview = scan_number_in_region((X + 690, Y + 272, X + 727, Y + 288), )
+    # Hier wird überprüft, ob die Order-Übersicht bereits geöffnet ist
+    order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
     print(order_overview)
-    if not order_overview or order_overview == "":  # Falls der Bereich leer ist, klicken, um zu öffnen
-        pyautogui.moveTo(X + 906, Y + 233)
+    if not order_overview:
+        pyautogui.moveTo(positions.ORDER_OVERVIEW_TOGGLE_POS)
         time.sleep(6)
-        pyautogui.click(X + 906, Y + 233)
+        pyautogui.click()
         time.sleep(0.1)
-        order_overview = scan_number_in_region((X + 690, Y + 272, X + 727, Y + 288))
+        order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
         if not order_overview:
             print("Fehler: Preisübersicht konnte nicht geöffnet werden.")
             return
 
     # Scanne beste Buy und Sell Order
-    sell_price = scan_number_in_region((X + 690, Y + 272, X + 727, Y + 288))
-
-    buy_price = scan_number_in_region((X + 915, Y + 272, X + 952, Y + 288))
+    sell_price = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
+    buy_price = scan_number_in_region(positions.BEST_BUY_PRICE_REGION)
 
     print("Detected Prices:", buy_price, sell_price)
-
-    # Überprüfe Differenz der Preise
-    print((sell_price - buy_price) / float(sell_price))
     if not sell_price or not buy_price or (sell_price - buy_price) * 100 / sell_price <= minimum_difference:
         print("Fehler: Preisunterschied nicht groß genug.")
         return
 
-    # Prozess zur Erstellung der Kauforder
-    pyautogui.click(X + 266, Y + 430)  # Klick auf "Kauforder"
+    pyautogui.click(positions.BUY_ORDER_POS)
     time.sleep(0.1)
-    for _ in range(quantity - 1):  # Klicke (+) bei Anzahl
-        pyautogui.click(X + 547, Y + 484)
+    for _ in range(quantity - 1):
+        pyautogui.click(positions.INCREASE_QUANTITY_POS)
         time.sleep(0.1)
-    pyautogui.click(X + 544, Y + 518)  # Klicke auf (+) bei Preis
+    pyautogui.click(positions.INCREASE_PRICE_POS)
     time.sleep(0.1)
-    pyautogui.click(X + 561, Y + 608)  # Klicke auf "Kauforder erstellen"
+    pyautogui.click(positions.CONFIRM_ORDER_POS)
     time.sleep(0.1)
-    pyautogui.click(X + 517, Y + 450)  # Klicke auf "Ja"
+    pyautogui.click(positions.CONFIRM_YES_POS)
     time.sleep(0.1)
 
     print("Kauforder erfolgreich erstellt.")
     return
-
-
-def type_with_delay(text, delay=0.01):
-    for char in text:
-        pyautogui.write(char)
-        time.sleep(delay)
 
 
 def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
@@ -109,7 +67,7 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
 
     # Überprüfe ob Order vorhanden
     scanned_name = scan_string_in_region((X + 391, Y + 302, X + 531, Y + 321))
-    print("Scanned name:",scanned_name)
+    print("Scanned name:", scanned_name)
     if scanned_name.strip().lower() != item_name.lower():
         print("Fehler: Order für das Item nicht gefunden.")
         return
@@ -166,6 +124,7 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
 
 def collect_items():
     X, Y = getAlbionPos()
+    # region in der das "check" symbol sichtbar sein sollte
     screen_region = (X + 1022, Y + 616, X + 1043, Y + 636)
     template_path = 'assets/check.png'
     if is_similar(screen_region, template_path):
