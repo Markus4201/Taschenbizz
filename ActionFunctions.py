@@ -1,8 +1,10 @@
 import pyautogui
 import time
+
+import sys
 from Utility.window_detect import getAlbionPos
 from Scanner import scan_number_in_region, scan_string_in_region, is_similar
-from HelperFuncitons import type_with_delay, click, check_open_orderoverview, scan_top_orders
+from HelperFuncitons import *
 from PositionVariables import *
 
 
@@ -34,34 +36,11 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
     click(positions.ITEM_NAME_ENTRY_POS)
     type_with_delay(item_name)
 
-    # Überprüfe ob Order vorhanden
-    scanned_name = scan_string_in_region(positions.MY_ORDER_ITEM_NAME)  # Annahme: die Region ist hier korrekt
-    print("Scanned name:", scanned_name)
-    if scanned_name.strip().lower() != item_name.lower():
-        print("Fehler: Order für das Item nicht gefunden.")
-        return
+    item_count, item_price = check_existing_order(item_name,positions)
 
-    # Anzahl der Items merken
-    item_count = scan_number_in_region((positions.EDIT_BUTTON_POS[0] + 300, positions.EDIT_BUTTON_POS[1] - 11,
-                                        positions.EDIT_BUTTON_POS[0] + 384, positions.EDIT_BUTTON_POS[1] + 19))
-
-    # Aktuellen Order Preis merken
-    item_price = scan_number_in_region((positions.EDIT_BUTTON_POS[0] - 158, positions.EDIT_BUTTON_POS[1] - 11,
-                                        positions.EDIT_BUTTON_POS[0] - 58, positions.EDIT_BUTTON_POS[1] + 19))
-
-    # Klicke auf Bearbeiten
     click(positions.EDIT_BUTTON_POS)
 
-
-    # Überprüfen, ob Preisübersicht geöffnet ist
-    order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
-    if not order_overview:
-        pyautogui.moveTo(positions.ORDER_OVERVIEW_TOGGLE_POS, duration=0.3)
-        pyautogui.click()
-        order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
-        if not order_overview:
-            print("Fehler: Preisübersicht konnte nicht geöffnet werden.")
-            return
+    check_open_orderoverview(positions)
 
     # Scanne beste Buy Order
     best_buy_price = scan_number_in_region(positions.BEST_BUY_PRICE_REGION)
@@ -76,15 +55,13 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
             type_with_delay(str(new_price))
         else:
             print("Fehler: Maximaler Zahlbetrag überschritten.")
-            return
+            sys.exit()
 
     # Klicke (+) bei Anzahl bis gewünschte Anzahl wieder erreicht
     for _ in range(quantity - item_count):
         click(positions.INCREASE_QUANTITY_POS)
 
-
     click(positions.CONFIRM_ORDER_POS)
-
 
     print("Kauforder erfolgreich aktualisiert.")
 
