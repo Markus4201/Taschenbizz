@@ -3,10 +3,11 @@ from PIL import ImageGrab
 import matplotlib.pyplot as plt
 import pytesseract
 import cv2
-
+import pyautogui
 
 def scan_string_in_region(region, showImage=False):
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    pyautogui.moveTo(region[0],region[1])
     # Bildschirmaufnahme des spezifizierten Bereichs
     screen = np.array(ImageGrab.grab(bbox=region))
 
@@ -31,6 +32,7 @@ def clean_and_convert_to_int(input_string):
 
 
 def scan_number_in_region(region, showImage=False):
+    pyautogui.moveTo(region[0],region[1])
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     # Bildschirmaufnahme des spezifizierten Bereichs
     screen = np.array(ImageGrab.grab(bbox=region))
