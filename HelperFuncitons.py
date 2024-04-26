@@ -12,15 +12,10 @@ def type_with_delay(text, delay=0.01):
         time.sleep(delay)
 
 
-def clean_and_convert_to_int(input_string):
-    # Entfernen aller Zeichen, die keine Ziffern sind
-    cleaned_string = ''.join(c for c in input_string if c.isdigit())
-    # Konvertieren in eine Ganzzahl
-    return int(cleaned_string)
 
 
 def click(position):
-    pyautogui.moveTo(position, duration=2)
+    pyautogui.moveTo(position, duration=.2)
     pyautogui.click()
 
 
@@ -33,7 +28,6 @@ def check_open_orderoverview(positions):
         order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
         if not order_overview:
             print("Fehler: Preisübersicht konnte nicht geöffnet werden.")
-            sys.exit()
 
 
 def scan_top_orders(positions, minimum_difference):
@@ -51,14 +45,14 @@ def scan_top_orders(positions, minimum_difference):
 def check_existing_buy_order(item_name, positions):
     scanned_name = scan_string_in_region(positions.MY_BUY_ORDER_ITEM_NAME)  # Annahme: die Region ist hier korrekt
     print("Scanned name:", scanned_name)
-    if scanned_name.strip().lower() != item_name.lower():
+    if len(scanned_name) < 5: #some name was found. exact comparison not working cause äöü getting not recoginzed
         print("Fehler: Order für das Item nicht gefunden.")
         return -1,-1
 
-    item_count = scan_number_in_region(positions.CURRENT_BUY_ORDER_AMOUNT_REGION, True)
+    item_count = scan_number_in_region(positions.CURRENT_BUY_ORDER_AMOUNT_REGION, )
 
     # Aktuellen Order Preis merken
-    item_price = scan_number_in_region(positions.CURRENT_BUY_ORDER_PRICE_REGION, True)
+    item_price = scan_number_in_region(positions.CURRENT_BUY_ORDER_PRICE_REGION, )
     print("Order has", item_count, "items, and price is:", item_price)
     return item_count, item_price
 
@@ -69,14 +63,15 @@ def check_existing_sell_order(item_name, positions):
         print("Fehler: Order für das Item nicht gefunden.")
         return -1,-1
 
-    item_count = scan_number_in_region(positions.CURRENT_SELL_ORDER_AMOUNT_REGION, True)
+    item_count = scan_number_in_region(positions.CURRENT_SELL_ORDER_AMOUNT_REGION, )
 
     # Aktuellen Order Preis merken
-    item_price = scan_number_in_region(positions.CURRENT_SELL_ORDER_PRICE_REGION, True)
+    item_price = scan_number_in_region(positions.CURRENT_SELL_ORDER_PRICE_REGION, )
     print("Order has", item_count, "items, and price is:", item_price)
     return item_count, item_price
 
 def updateQuantity(current_quantity, target_quantity, positions):
+    print("found", current_quantity, "items, setting it to:", target_quantity)
     if target_quantity > current_quantity:
         # Die gewünschte Quantität ist größer als die aktuelle, erhöhe die Quantität
         increment_amount = target_quantity - current_quantity

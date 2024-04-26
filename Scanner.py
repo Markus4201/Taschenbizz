@@ -5,6 +5,17 @@ import pytesseract
 import cv2
 import pyautogui
 
+
+def clean_string(input_string):
+    # Ersetzt Zeilenumbrüche durch Leerzeichen
+    cleaned_string = ' '.join(input_string.splitlines())
+
+    # Entfernt führende und abschließende Leerzeichen und korrigiert mehrfache Leerzeichen innerhalb des Strings
+    cleaned_string = ' '.join(cleaned_string.split())
+
+    return cleaned_string
+
+
 def scan_string_in_region(region, showImage=False):
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     pyautogui.moveTo(region[0],region[1])
@@ -18,10 +29,11 @@ def scan_string_in_region(region, showImage=False):
         plt.show()
 
     # OCR-Konfiguration für Textextraktion
-    extracted_text = pytesseract.image_to_string(screen)
+    custom_config = r'--oem 3 --psm 6 -c tessedit_char_whitelist= abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZäöüÄÖÜß'
+    extracted_text = pytesseract.image_to_string(screen, config=custom_config)
     print("Scanned String: ", extracted_text)
 
-    return extracted_text
+    return clean_string(extracted_text)
 
 
 def clean_and_convert_to_int(input_string):

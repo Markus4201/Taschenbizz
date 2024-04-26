@@ -26,21 +26,23 @@ class PositionConfig:
         self.TOTAL_AMOUNT_REGION = (X + 517, Y + 459, X + 547, Y + 472)
         self.SELL_ORDER_POS = (X + 266, Y + 405)
         self.DECREASE_QUANTITY_POS = (X + 271, Y + 484)
+        self.ITEM_SELL_NAME_REGION = (X+ 360, Y+ 324, X+640,Y+340)
 
         # updateOrder
         self.MY_ORDERS_POS = (X + 1033, Y + 470)
         self.ITEM_ENTRY_POS = (X + 340, Y + 180)
         self.EDIT_BUY_ORDER_BUTTON_POS = (X + 892, Y + 311)
-        self.SCREEN_REGION = (X + 1022, Y + 616, X + 1043, Y + 636)
+        #self.SCREEN_REGION = (X + 1022, Y + 616, X + 1043, Y + 636)
         self.COLLECT_TRADES_POS = (X + 1040, Y + 615)
         self.COLLECT_ALL_POS = (X + 940, Y + 750)
-        self.MY_BUY_ORDER_ITEM_NAME = (X + 385, Y + 302, X + 530, Y + 321)
+        self.MY_BUY_ORDER_ITEM_NAME = (X + 385, Y + 296, X + 530, Y + 329)
         self.CURRENT_BUY_ORDER_AMOUNT_REGION = (X + 531, Y + 301, X + 578, Y + 320)
         self.CURRENT_BUY_ORDER_PRICE_REGION = (X + 723, Y + 301, X + 828, Y + 320)
         self.TYPE_PRICE_POS = (X+358,Y+518)
+        self.CLOSE_BUTTON = (X+620, Y+ 218)
 
         #sellOrder:
-        self.MY_SELL_ORDER_ITEM_NAME = (X + 385, Y + 582, X + 530, Y + 600)
+        self.MY_SELL_ORDER_ITEM_NAME = (X + 385, Y + 576, X + 530, Y + 608)
         self.CURRENT_SELL_ORDER_AMOUNT_REGION = (X + 531, Y + 582, X + 578, Y + 600)
         self.CURRENT_SELL_ORDER_PRICE_REGION = (X + 723, Y + 582, X + 828, Y + 600)
         self.EDIT_SELL_ORDER_BUTTON_POS = (X + 892, Y + 590)
