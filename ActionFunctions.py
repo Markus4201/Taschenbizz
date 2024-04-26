@@ -15,7 +15,8 @@ def create_buy_order(item_name, quantity, minimum_difference):
     type_with_delay(item_name)
     click(positions.BUY_BUTTON_POS)
     check_open_orderoverview(positions)
-    scan_top_orders(positions, minimum_difference)
+    a, b = scan_top_orders(positions, minimum_difference)
+    if (a == -1): return
     click(positions.BUY_ORDER_POS)
 
     for _ in range(quantity - 1):
@@ -34,14 +35,14 @@ def create_sell_order(item_name, quantity, minimum_difference):
     click(positions.SELL_SECTION_BUTTON)
     click(positions.ITEM_NAME_ENTRY_POS)
     type_with_delay(item_name)
-    while scan_string_in_region(positions.ITEM_SELL_NAME_REGION, ) == item_name:
-
+    while are_strings_similar(scan_string_in_region(positions.ITEM_SELL_NAME_REGION), item_name):
         click(positions.SELL_BUTTON_POS)
         check_open_orderoverview(positions)
-        scan_top_orders(positions, minimum_difference)
+        a,b = scan_top_orders(positions, minimum_difference)
+        if a==-1: return
         click(positions.SELL_ORDER_POS)
         available_items_count = scan_number_in_region(positions.TOTAL_AMOUNT_REGION)
-        #updateQuantity(available_items_count, quantity, positions)
+        # updateQuantity(available_items_count, quantity, positions)
 
         click(positions.DECREASE_PRICE_POS)
         click(positions.CONFIRM_ORDER_POS)
@@ -49,7 +50,6 @@ def create_sell_order(item_name, quantity, minimum_difference):
 
         print("Verkaufsorder erfolgreich erstellt.")
     print("Kein Item zum verkauen im inventar gefunden")
-
 
 
 def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
@@ -70,6 +70,7 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
     check_open_orderoverview(positions)
 
     best_sell_price, best_buy_price = scan_top_orders(positions, minimum_difference)
+    if best_sell_price==-1: return
 
     # Setze Preis auf gescannten Preis +1, falls < maxPayAmount
     new_price = best_buy_price + 1
@@ -119,6 +120,7 @@ def update_sell_order(item_name, quantity, minimum_difference, min_sell_amount):
 
     # Scanne beste Buy Order
     best_sell_price, best_buy_price = scan_top_orders(positions, minimum_difference)
+    if best_sell_price == -1: return
 
     # Setze Preis auf gescannten Preis +1, falls < maxPayAmount
     new_price = best_sell_price - 1
@@ -136,7 +138,7 @@ def update_sell_order(item_name, quantity, minimum_difference, min_sell_amount):
 
     # Klicke (+) bei Anzahl bis gewünschte Anzahl wieder erreicht
 
-    #updateQuantity(item_count, quantity, positions)
+    # updateQuantity(item_count, quantity, positions)
     if need_update:
         click(positions.CONFIRM_ORDER_POS)
     else:
@@ -161,7 +163,7 @@ def collect_items():
         # Bewegen zum Button "Alles einsammeln" und klicken
         pyautogui.moveTo(X + 940, Y + 750, duration=0.3)
         pyautogui.click()
-        time.sleep(2)
+        time.sleep(5)
 
         print("Items erfolgreich eingesammelt.")
     else:

@@ -7,7 +7,7 @@ def handle_quit_signal(signum, frame):
     raise SystemExit
 
 def keypress_watchdog():
-    print("Drücken Sie 'Q' um das Programm zuq beenden...")
+    print("Drücken Sie 'ESC' um das Programm zuq beenden...")
     keyboard.wait('ESC')
     signal.raise_signal(signal.SIGINT)
 def setup_watchdog():
