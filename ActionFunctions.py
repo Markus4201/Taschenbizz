@@ -10,7 +10,7 @@ from PositionVariables import *
 
 def create_buy_order(item_name, quantity, minimum_difference):
     positions = PositionConfig()
-
+    click(positions.BUY_SECTION_BUTTON)
     click(positions.ITEM_NAME_ENTRY_POS)
     type_with_delay(item_name)
     click(positions.BUY_BUTTON_POS)
@@ -29,6 +29,30 @@ def create_buy_order(item_name, quantity, minimum_difference):
     return
 
 
+def create_sell_order(item_name, quantity, minimum_difference):
+    positions = PositionConfig()
+    click(positions.SELL_SECTION_BUTTON)
+    click(positions.ITEM_NAME_ENTRY_POS)
+    type_with_delay(item_name)
+    click(positions.SELL_BUTTON_POS)
+    check_open_orderoverview(positions)
+    scan_top_orders(positions, minimum_difference)
+    click(positions.SELL_ORDER_POS)
+    available_items_count = scan_number_in_region(positions.TOTAL_AMOUNT_REGION)
+    if (quantity > available_items_count):
+        print("nicht genügend items verfügbar, kauforder wird mit allen items erstellt")
+    elif (quantity < available_items_count):
+        for _ in range(available_items_count - quantity):
+            click(positions.DECREASE_QUANTITY_POS)
+
+    click(positions.DECREASE_PRICE_POS)
+    click(positions.CONFIRM_ORDER_POS)
+    click(positions.CONFIRM_YES_POS)
+
+    print("Verkaufsorder erfolgreich erstellt.")
+    return
+
+
 def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
     positions = PositionConfig()
 
@@ -36,7 +60,7 @@ def update_buy_order(item_name, quantity, minimum_difference, max_pay_amount):
     click(positions.ITEM_NAME_ENTRY_POS)
     type_with_delay(item_name)
 
-    item_count, item_price = check_existing_order(item_name,positions)
+    item_count, item_price = check_existing_order(item_name, positions)
 
     click(positions.EDIT_BUTTON_POS)
 
