@@ -45,18 +45,53 @@ def scan_top_orders(positions, minimum_difference):
     if not sell_price or not buy_price or (sell_price - buy_price) * 100 / sell_price <= minimum_difference:
         print("Fehler: Preisunterschied nicht groß genug.")
         sys.exit()
+    return sell_price, buy_price
 
 
-def check_existing_order(item_name, positions):
-    scanned_name = scan_string_in_region(positions.MY_ORDER_ITEM_NAME)  # Annahme: die Region ist hier korrekt
+def check_existing_buy_order(item_name, positions):
+    scanned_name = scan_string_in_region(positions.MY_BUY_ORDER_ITEM_NAME)  # Annahme: die Region ist hier korrekt
     print("Scanned name:", scanned_name)
     if scanned_name.strip().lower() != item_name.lower():
         print("Fehler: Order für das Item nicht gefunden.")
-        sys.exit()
+        return -1,-1
 
-    item_count = scan_number_in_region(positions.CURRENT_ORDER_AMOUNT_REGION, True)
+    item_count = scan_number_in_region(positions.CURRENT_BUY_ORDER_AMOUNT_REGION, True)
 
     # Aktuellen Order Preis merken
-    item_price = scan_number_in_region(positions.CURRENT_ORDER_PRICE_REGION,True)
+    item_price = scan_number_in_region(positions.CURRENT_BUY_ORDER_PRICE_REGION, True)
     print("Order has", item_count, "items, and price is:", item_price)
     return item_count, item_price
+
+def check_existing_sell_order(item_name, positions):
+    scanned_name = scan_string_in_region(positions.MY_SELL_ORDER_ITEM_NAME)  # Annahme: die Region ist hier korrekt
+    print("Scanned name:", scanned_name)
+    if scanned_name.strip().lower() != item_name.lower():
+        print("Fehler: Order für das Item nicht gefunden.")
+        return -1,-1
+
+    item_count = scan_number_in_region(positions.CURRENT_SELL_ORDER_AMOUNT_REGION, True)
+
+    # Aktuellen Order Preis merken
+    item_price = scan_number_in_region(positions.CURRENT_SELL_ORDER_PRICE_REGION, True)
+    print("Order has", item_count, "items, and price is:", item_price)
+    return item_count, item_price
+
+def updateQuantity(current_quantity, target_quantity, positions):
+    if target_quantity > current_quantity:
+        # Die gewünschte Quantität ist größer als die aktuelle, erhöhe die Quantität
+        increment_amount = target_quantity - current_quantity
+        for _ in range(increment_amount):
+            click(positions.INCREASE_QUANTITY_POS)
+            time.sleep(0.1)  # Kurze Pause, um sicherzustellen, dass das UI reagieren kann
+        print(f"Quantität wurde um {increment_amount} erhöht.")
+
+    elif target_quantity < current_quantity:
+        # Die gewünschte Quantität ist kleiner als die aktuelle, verringere die Quantität
+        decrement_amount = current_quantity - target_quantity
+        for _ in range(decrement_amount):
+            click(positions.DECREASE_QUANTITY_POS)
+            time.sleep(0.1)  # Kurze Pause, um sicherzustellen, dass das UI reagieren kann
+        print(f"Quantität wurde um {decrement_amount} verringert.")
+    else:
+        # Die gewünschte Quantität ist gleich der aktuellen Quantität
+        print("Keine Anpassung der Quantität erforderlich.")
