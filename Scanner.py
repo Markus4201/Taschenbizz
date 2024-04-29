@@ -59,7 +59,7 @@ def scan_number_in_region(region, showImage=False):
     custom_config = r'--oem 3 --psm 6 outputbase digits'
     extracted_text = pytesseract.image_to_string(screen, config=custom_config)
 
-    print("Scanned Number: ",str(clean_and_convert_to_int(extracted_text)))
+    #print("Scanned Number: ",str(clean_and_convert_to_int(extracted_text)))
 
     # Rückgabe der bereinigten und konvertierten Zahl
     return clean_and_convert_to_int(extracted_text)

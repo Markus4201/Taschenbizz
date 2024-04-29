@@ -6,7 +6,7 @@ from Levenshtein import distance as levenshtein_distance
 from Scanner import scan_number_in_region, scan_string_in_region
 
 
-def type_with_delay(text, delay=0.003):
+def type_with_delay(text, delay=0.00):
     for char in text:
         pyautogui.write(char)
         time.sleep(delay)
@@ -15,24 +15,23 @@ def type_with_delay(text, delay=0.003):
 
 
 def click(position):
-    pyautogui.moveTo(position, duration=1)
+    pyautogui.moveTo(position, duration=0.00)
     pyautogui.click()
 
 
 def check_open_orderoverview(positions):
     # Hier wird überprüft, ob die Order-Übersicht bereits geöffnet ist
-    order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
-    print("Order overview check:", order_overview)
+    order_overview = scan_number_in_region(positions.BEST_SELL_PRICE_REGION)
     if not order_overview:
         click(positions.ORDER_OVERVIEW_TOGGLE_POS)
-        order_overview = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
+        order_overview = scan_number_in_region(positions.BEST_SELL_PRICE_REGION)
         if not order_overview:
             print("Fehler: Preisübersicht konnte nicht geöffnet werden.")
 
 
-def scan_top_orders(positions, minimum_difference):
+def scan_top_orders(positions, minimum_difference=0):
     # Scanne beste Buy und Sell Order
-    sell_price = scan_number_in_region(positions.ORDER_OVERVIEW_REGION)
+    sell_price = scan_number_in_region(positions.BEST_SELL_PRICE_REGION)
     buy_price = scan_number_in_region(positions.BEST_BUY_PRICE_REGION)
 
     print("Detected Prices:", buy_price, sell_price)
