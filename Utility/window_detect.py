@@ -18,7 +18,7 @@ def callback(hwnd, extra):
     #print("Window %s:" % win32gui.GetWindowText(hwnd)[:9])
     #print("\tLocation: (%d, %d)" % (x, y))
     #print("\t    Size: (%d, %d)" % (w, h))
-    if(win32gui.GetWindowText(hwnd)[:6] == 'Albion'):
+    if(win32gui.GetWindowText(hwnd)[:8] == 'Albion O'):
         pos[0] = rect[0]
         pos[1] = rect[1]
         floW = rect[2] - x
